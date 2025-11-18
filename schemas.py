@@ -11,8 +11,9 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
+from datetime import datetime
 
 # Example schemas (replace with your own):
 
@@ -38,11 +39,30 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
 # --------------------------------------------------
+# Core Content Hub schemas (used by the CMS)
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Category(BaseModel):
+    """
+    Categories for grouping posts
+    Collection name: "category"
+    """
+    name: str = Field(..., description="Category name")
+    slug: str = Field(..., description="URL-safe unique slug")
+    description: Optional[str] = Field(None, description="Category description")
+
+class Post(BaseModel):
+    """
+    Post content schema
+    Collection name: "post"
+    """
+    title: str = Field(..., description="Post title")
+    slug: str = Field(..., description="URL-safe unique slug")
+    excerpt: Optional[str] = Field(None, description="Short summary")
+    content: str = Field(..., description="Rich content (HTML/Markdown)")
+    image_url: Optional[str] = Field(None, description="Lead image URL")
+    category_slug: Optional[str] = Field(None, description="Associated category slug")
+    tags: Optional[List[str]] = Field(default=None, description="List of tags")
+    status: str = Field("draft", description="draft | published")
+    author: Optional[str] = Field(None, description="Author name")
+    published_at: Optional[datetime] = Field(None, description="Publish timestamp (UTC)")
